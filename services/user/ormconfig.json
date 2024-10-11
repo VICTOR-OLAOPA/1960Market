@@ -1,0 +1,14 @@
+{
+    "type": "mysql",
+    "host": "mysql",
+    "port": 3307,
+    "username": "root",
+    "password": "#Admin101",
+    "database": "1960Market",
+    "synchronize": true,
+    "logging": true,
+    "entities": ["src/models/**/*.ts"],
+    "migrations": ["src/migration/**/*.ts"],
+    "subscribers": ["src/subscriber/**/*.ts"]
+  }
+  

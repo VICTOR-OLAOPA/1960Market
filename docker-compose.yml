@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  api_gateway:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./api_gateway:/etc/nginx/conf.d
+    depends_on:
+      - user_service
+      - product_service
+      - auth_service
+
+  user_service:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    build: ./services/user
+    ports:
+      - "3001:3001"
+    env_file: ./services/user/.env
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+
+  product_service:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    build: ./services/product
+    ports:
+      - "3002:3002"
+    
+    env_file: ./services/product/.env
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+
+  auth_service:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    build: ./services/auth
+    ports:
+      - "3003:3003"
+    env_file: ./services/auth/.env
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+
+  mysql:
+    image: mysql:8
+    env_file: ./services/user/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: $DB_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
